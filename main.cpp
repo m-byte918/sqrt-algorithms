@@ -13,14 +13,14 @@ float sqrt1(const float &n) {
 
     u.x =  n;
     u.i =  536870912 + (u.i >> 1) - 4194304;
-    u.x += n/u.x;
+    u.x += n / u.x;
 
-    return 0.25f*u.x + n/u.x;
+    return 0.25f * u.x + n / u.x;
 }
 
 float sqrt2(const float &n) {
     int i = *(int*)&n;
-    i = 0x5f3759df - (i>>1);
+    i = 0x5f3759df - (i >> 1);
     float r = *(float*)&i;
     r *= (1.5f - 0.5f*n*r*r); // Repeating increases accuracy
     return r * n;
@@ -40,25 +40,25 @@ float sqrt3(const float &n) {
 
 float sqrt4(const float &n) {
     int i = 0;
-    while(i*i <= n)
+    while(i * i <= n)
         ++i;
     --i;
-    float p = (n - i*i)/(2*i);
-    float a = i+p;
-    return a-(p*p)/(2*a);
+    float p = (n - i*i) / (2*i);
+    float a = i + p;
+    return a-(p*p) / (2*a);
 }
 
 float sqrt5(const float &n) {
     float i = 0;
-    float x1, x2;
-    while(i*i <= n)
-        i+=0.1f;
-    x1 = i;
-    for(int j=0;j<10;++j) {
+    while(i * i <= n)
+        i += 0.1f;
+
+    float x1 = i, x2;
+    for(int j = 0; j < 10; ++j) {
         x2 = n;
         x2 /= x1;
         x2 += x1;
-        x2 /= 2;
+        x2 *= 0.5f;
         x1 = x2;
     }
     return x2;
@@ -104,7 +104,7 @@ double sqrt9(const float &n) {
     while ((high-low) > .001) { // .001 = accuracy
         guess = (low + high) * 0.5f;
 
-        if (guess*guess > n)
+        if (guess * guess > n)
             high = guess;
         else
             low = guess;
@@ -113,11 +113,9 @@ double sqrt9(const float &n) {
 }
 
 double sqrt10(const float &n) {
-    double x, p, low, high;
-    if (2 > n)
-        return n;
-    low  = 0;
-    high = n;
+    double high = n, low, x, p;
+    if (n < 2) return n;
+
     while(high > low + 1) {
         x = (high + low) * 0.5f;
         p = x * x;
@@ -135,7 +133,7 @@ double sqrt11(const float &n) {
     double x = 1;
 
     for(int i = 0; i < n; ++i)
-        x = 0.5*(x+n/x);
+        x = 0.5f * (x + n/x);
 
     return x;
 }
@@ -145,15 +143,13 @@ float sqrt12(const float &n) {
     return *(float*)&x;
 }
 
-double getTime(auto func) {
-    using namespace std::chrono;
-
-    high_resolution_clock::time_point t1 = high_resolution_clock::now();
+unsigned int getTime(auto func) {
+    auto t1 = std::chrono::high_resolution_clock::now();
     for (int i = 0; i <= performanceTestLoopAmount; ++i) {
         func(i);
     }
-    high_resolution_clock::time_point t2 = high_resolution_clock::now();
-    return duration_cast<nanoseconds>(t2 - t1).count();
+    auto t2 = std::chrono::high_resolution_clock::now();
+    return std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1).count();
 }
 
 int main() {
